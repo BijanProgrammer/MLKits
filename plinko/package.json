@@ -1,0 +1,22 @@
+{
+  "name": "plinko",
+  "version": "1.0.0",
+  "description": "",
+  "main": "score.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start": "vite"
+  },
+  "keywords": [],
+  "author": "BijanProgrammer",
+  "license": "ISC",
+  "dependencies": {
+    "live-server": "^1.2.2",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "vite": "^5.3.5"
+  }
+}
