@@ -1,6 +1,7 @@
 import _ from "lodash";
 
 const outputs = [];
+const k = 10;
 const testSize = 50;
 
 export function onScoreUpdate(dropPosition, bounciness, size, bucketLabel) {
@@ -10,19 +11,21 @@ export function onScoreUpdate(dropPosition, bounciness, size, bucketLabel) {
 
 export function runAnalysis() {
   // Write code here to analyze stuff
-  const [testSet, trainingSet] = splitDataset(outputs, testSize);
 
-  _.range(1, 15, 1).forEach((k) => {
+  _.range(0, 3).forEach((feature) => {
+    const data = _.map(outputs, (row) => [row[feature], _.last(row)]);
+    const [testSet, trainingSet] = splitDataset(minmax(data, 1), testSize);
+
     const accuracy = _.chain(testSet)
       .filter(
         (testPoint) =>
-          knn(trainingSet, _.initial(testPoint), k) === testPoint[3],
+          knn(trainingSet, _.initial(testPoint), k) === _.last(testPoint),
       )
       .size()
       .divide(testSize)
       .value();
 
-    console.log(`Accuracy (k=${k}): ${accuracy}`);
+    console.log(`Accuracy (feature=${feature}): ${accuracy}`);
   });
 }
 
@@ -59,4 +62,21 @@ function splitDataset(data, testSize) {
   const trainingSet = _.slice(shuffled, testSize);
 
   return [testSet, trainingSet];
+}
+
+function minmax(data, featureCount) {
+  const clonedData = _.cloneDeep(data);
+
+  for (let i = 0; i < featureCount; i++) {
+    const column = clonedData.map((row) => row[i]);
+
+    const min = _.min(column);
+    const max = _.max(column);
+
+    for (let j = 0; j < clonedData.length; j++) {
+      clonedData[j][i] = (clonedData[j][i] - min) / (max - min);
+    }
+  }
+
+  return clonedData;
 }
