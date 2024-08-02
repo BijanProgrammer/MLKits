@@ -24,11 +24,11 @@ labels
  */
 
 const regression = new LinearRegression(features, labels, {
-  learningRate: 0.001,
-  iterations: 1,
+  learningRate: 1,
+  iterations: 100,
 });
 
 regression.train();
+const r2 = regression.test(testFeatures, testLabels);
 
-console.log(`m: ${regression.weights.arraySync()[1][0]}`);
-console.log(`b: ${regression.weights.arraySync()[0][0]}`);
+console.log(`R2: ${r2}`);
