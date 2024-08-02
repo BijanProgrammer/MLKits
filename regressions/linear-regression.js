@@ -57,6 +57,10 @@ class LinearRegression {
     return 1 - ssRes / ssTot;
   }
 
+  predict(observations) {
+    return this.#processFeatures(observations).matMul(this.weights);
+  }
+
   #gradientDescent(features, labels) {
     const guesses = features.matMul(this.weights);
     const diffs = guesses.sub(labels);

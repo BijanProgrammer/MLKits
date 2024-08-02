@@ -25,10 +25,12 @@ labels
 const regression = new LinearRegression(features, labels, {
   learningRate: 0.1,
   iterations: 3,
-  batchSize: 1,
+  batchSize: 10,
 });
 
 regression.train();
 const r2 = regression.test(testFeatures, testLabels);
 
 console.log(`R2: ${r2}`);
+
+regression.predict([[150, 400, 1.8805]]).print();
