@@ -9,6 +9,7 @@ class LinearRegression {
   constructor(features, labels, options) {
     this.features = this.#processFeatures(features);
     this.labels = tf.tensor(labels);
+    this.mseHistory = [];
 
     this.options = {
       learningRate: 0.1,
@@ -16,12 +17,14 @@ class LinearRegression {
       ...options,
     };
 
-    this.weights = tf.zeros([2, 1]);
+    this.weights = tf.zeros([this.features.shape[1], 1]);
   }
 
   train() {
     for (let i = 0; i < this.options.iterations; i++) {
       this.#gradientDescent();
+      this.#recordMse();
+      this.#updateLearningRate();
     }
   }
 
@@ -70,6 +73,33 @@ class LinearRegression {
     this.variance = variance;
 
     return features.sub(mean).div(variance.pow(0.5));
+  }
+
+  #recordMse() {
+    const mse = this.features
+      .matMul(this.weights)
+      .sub(this.labels)
+      .pow(2)
+      .sum()
+      .div(this.features.shape[0])
+      .dataSync();
+
+    this.mseHistory.unshift(mse);
+  }
+
+  #updateLearningRate() {
+    if (this.mseHistory.length < 2) {
+      return;
+    }
+
+    const lastMse = this.mseHistory[0];
+    const secondToLastMse = this.mseHistory[1];
+
+    if (lastMse > secondToLastMse) {
+      this.options.learningRate /= 2;
+    } else {
+      this.options.learningRate *= 1.05;
+    }
   }
 }
 
