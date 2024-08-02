@@ -1,4 +1,3 @@
-const tf = require("@tensorflow/tfjs-node");
 const loadCsv = require("./load-csv");
 const LinearRegression = require("./linear-regression");
 
@@ -24,8 +23,9 @@ labels
  */
 
 const regression = new LinearRegression(features, labels, {
-  learningRate: 1,
-  iterations: 1000,
+  learningRate: 0.1,
+  iterations: 3,
+  batchSize: 1,
 });
 
 regression.train();
