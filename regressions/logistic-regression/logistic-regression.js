@@ -4,17 +4,21 @@ class LogisticRegression {
   /**
    * @param {number[][]} features
    * @param {number[][]} labels
-   * @param {{learningRate: number, iterations: number}} options
+   * @param {{learningRate: number, iterations: number, batchSize: number, decisionBoundary: number}} options
    */
   constructor(features, labels, options) {
+    /**
+     * @type {Tensor<number>}
+     */
     this.features = this.#processFeatures(features);
     this.labels = tf.tensor(labels);
-    this.mseHistory = [];
+    this.costHistory = [];
 
     this.options = {
       learningRate: 0.1,
       iterations: 1000,
       batchSize: 1,
+      decisionBoundary: 0.5,
       ...options,
     };
 
@@ -40,13 +44,13 @@ class LogisticRegression {
         this.#gradientDescent(featureSlice, labelSlice);
       }
 
-      this.#recordMse();
+      this.#recordCost();
       this.#updateLearningRate();
     }
   }
 
   test(testFeatures, testLabels) {
-    const predictions = this.predict(testFeatures).round();
+    const predictions = this.predict(testFeatures);
     testLabels = tf.tensor(testLabels);
 
     const incorrect = predictions.sub(testLabels).abs().sum().dataSync();
@@ -55,7 +59,11 @@ class LogisticRegression {
   }
 
   predict(observations) {
-    return this.#processFeatures(observations).matMul(this.weights).sigmoid();
+    return this.#processFeatures(observations)
+      .matMul(this.weights)
+      .sigmoid()
+      .greater(this.options.decisionBoundary)
+      .cast("float32");
   }
 
   #gradientDescent(features, labels) {
@@ -67,18 +75,22 @@ class LogisticRegression {
     this.weights = this.weights.sub(slopes.mul(this.options.learningRate));
   }
 
+  /**
+   * @param {number[][]} features
+   * @return {Tensor}
+   */
   #processFeatures(features) {
-    features = tf.tensor(features);
+    let result = tf.tensor(features);
 
     if (this.mean && this.variance) {
-      features = features.sub(this.mean).div(this.variance.pow(0.5));
+      result = result.sub(this.mean).div(this.variance.pow(0.5));
     } else {
-      features = this.#standardize(features);
+      result = this.#standardize(result);
     }
 
-    features = tf.ones([features.shape[0], 1]).concat(features, 1);
+    result = tf.ones([result.shape[0], 1]).concat(result, 1);
 
-    return features;
+    return result;
   }
 
   #standardize(features) {
@@ -90,27 +102,35 @@ class LogisticRegression {
     return features.sub(mean).div(variance.pow(0.5));
   }
 
-  #recordMse() {
-    const mse = this.features
-      .matMul(this.weights)
-      .sub(this.labels)
-      .pow(2)
-      .sum()
+  #recordCost() {
+    const guesses = this.features.matMul(this.weights).sigmoid();
+
+    const termOne = this.labels.transpose().matMul(guesses.log());
+
+    const termTwo = this.labels
+      .mul(-1)
+      .add(1)
+      .transpose()
+      .matMul(guesses.mul(-1).add(1).log());
+
+    const cost = termOne
+      .add(termTwo)
       .div(this.features.shape[0])
+      .mul(-1)
       .dataSync();
 
-    this.mseHistory.unshift(mse);
+    this.costHistory.unshift(cost);
   }
 
   #updateLearningRate() {
-    if (this.mseHistory.length < 2) {
+    if (this.costHistory.length < 2) {
       return;
     }
 
-    const lastMse = this.mseHistory[0];
-    const secondToLastMse = this.mseHistory[1];
+    const lastCost = this.costHistory[0];
+    const secondToLastCost = this.costHistory[1];
 
-    if (lastMse > secondToLastMse) {
+    if (lastCost > secondToLastCost) {
       this.options.learningRate /= 2;
     } else {
       this.options.learningRate *= 1.05;
