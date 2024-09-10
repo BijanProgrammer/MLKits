@@ -1,7 +1,7 @@
-const loadCsv = require("./load-csv");
+const loadCsv = require("../load-csv");
 const LinearRegression = require("./linear-regression");
 
-let { features, labels, testFeatures, testLabels } = loadCsv("cars.csv", {
+let { features, labels, testFeatures, testLabels } = loadCsv("data/cars.csv", {
   shuffle: true,
   splitTest: 50,
   dataColumns: ["horsepower", "displacement", "weight"],
