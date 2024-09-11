@@ -2,9 +2,9 @@
   "name": "logistic_regression",
   "version": "1.0.0",
   "description": "",
-  "main": "logistic-regression/index.js",
+  "main": "multinomial-logistic-regression/index.js",
   "scripts": {
-    "start": "node logistic-regression/index.js"
+    "start": "node multinomial-logistic-regression/index.js"
   },
   "author": "",
   "license": "ISC",
