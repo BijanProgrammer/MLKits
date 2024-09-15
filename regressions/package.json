@@ -2,9 +2,9 @@
   "name": "logistic_regression",
   "version": "1.0.0",
   "description": "",
-  "main": "multinomial-logistic-regression/index.js",
+  "main": "image-recognition/index.js",
   "scripts": {
-    "start": "node multinomial-logistic-regression/index.js"
+    "start": "node image-recognition/index.js"
   },
   "author": "",
   "license": "ISC",
