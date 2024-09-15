@@ -22,7 +22,7 @@ function loadTrainData() {
 
 const { features, labels } = loadTrainData();
 
-const testData = mnist.testing(0, 100);
+const testData = mnist.testing(0, 10000);
 
 const testFeatures = testData.images.values.map((image) => image.flat());
 
@@ -34,8 +34,8 @@ const testLabels = testData.labels.values.map((label) => {
 
 const regression = new LogisticRegression(features, labels, {
   learningRate: 1,
-  iterations: 20,
-  batchSize: 100,
+  iterations: 40,
+  batchSize: 500,
 });
 
 regression.train();
